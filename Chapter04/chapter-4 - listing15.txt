@@ -1,0 +1,93 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "Locations": {
+      "type": "array",
+      "defaultValue": [ "east us", "west us" ],
+      "metadata": {
+        "description": "Deployment locations"
+      }
+    }
+
+  },
+  "variables": {
+    "enabledForDeployment": "true",
+    "enabledForTemplateDeployment": "true",
+    "enableVaultForVolumeEncryption": "true",
+    "tenantId": "771f1cf4-b1ac-4f2e-ad21-de39ea201e7e",
+    "clientId": "5ecc2085-c985-4dec-a4ce-1108a252833b",
+    "permissions": {
+      "keys": [ "all" ],
+      "secrets": [ "all" ]
+    },
+    "vaultSku": "Standard",
+    "vaultName": "gyftdrj"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/resourceGroups",
+      "location": "[parameters('Locations')[copyIndex()]]",
+      "name": "[concat('location',copyIndex())]",
+      "apiVersion": "2018-05-01",
+      "copy": {
+        "name": "allResourceGroups",
+        "count": "[length(parameters('Locations'))]"
+      },
+      "properties": {}
+    },
+    {
+      "apiVersion": "2017-05-10",
+      "name": "[concat('nestedTemplate', copyindex())]",
+      "type": "Microsoft.Resources/deployments",
+      "resourceGroup": "[concat('location',copyIndex())]",
+      "copy": {
+        "name": "keyVaults",
+        "count": "[length(parameters('Locations'))]"
+      },
+      "dependsOn": [ "allResourceGroups" ],
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          
+            "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+            "contentVersion": "1.0.0.0",
+            "parameters": {
+            },
+            "variables": {
+
+            },
+            "resources": [
+              {
+                "type": "Microsoft.KeyVault/vaults",
+                "name": "[concat(variables('vaultName'), string(copyindex()))]",
+                "location": "[parameters('Locations')[copyIndex()]]",
+                "apiVersion": "2015-06-01",
+                "properties": {
+                  "enabledForDeployment": "[variables('enabledForDeployment')]",
+                  "enabledForTemplateDeployment": "[variables('enabledForTemplateDeployment')]",
+                  "enabledForVolumeEncryption": "[variables('enableVaultForVolumeEncryption')]",
+                  "tenantId": "[variables('tenantId')]",
+                  "accessPolicies": [
+                    {
+                      "tenantId": "[variables('tenantId')]",
+                      "objectId": "[variables('clientId')]",
+                      "permissions": "[variables('permissions')]"
+                    }
+                  ],
+                  "sku": {
+                    "name": "[variables('vaultSku')]",
+                    "family": "A"
+                  }
+                }
+              }
+
+            ]
+
+          }
+        
+
+      }
+    }
+  ]
+}

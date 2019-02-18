@@ -1,0 +1,149 @@
+
+
+
+param(
+[string] $deploymentName = "csa01",
+[string] $resourceGroupName = "test01"
+
+)
+
+ 
+ Describe "Validation Tests" {
+   BeforeAll {
+        
+
+        $deployment =  (Get-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName  -Name $deploymentName)
+
+        $storage = $deployment.Outputs.storageAccount.Value
+        $publicIP = $deployment.Outputs.publicIPAddressName.Value
+        $nic = $deployment.Outputs.nicName.Value
+        $virtualNetwork = $deployment.Outputs.virtualNetworkName.Value
+        $virtualMachine = $deployment.Outputs.vmName.Value
+    }
+    Context "Storage from template deployment" {
+     
+            It "The storage account has been provisioned successfully" {                
+                [string]$storage.provisioningState | Should Be "Succeeded"
+            }
+            It "The storage account is in available state" {
+                 [string]$storage.statusOfPrimary | Should Be "available"
+            }
+
+
+            
+            It "The storage account location is West Europe" {
+                 [string]$storage.primaryLocation | Should Be "westeurope"
+            }
+
+     }  
+    Context "virtual network from template deployment" {
+     
+            It "The virtual network has been provisioned successfully" {                
+                [string]$virtualNetwork.provisioningState | Should Be "Succeeded"
+            }
+            It "The address range for virtual network is $($deployment.Parameters.addressPrefix.Value)" {
+                 [string]$virtualNetwork.addressSpace.addressPrefixes | Should Be "10.0.0.0/16"
+            }
+            It "The count of subnets in virtual network is 1" {
+                 [int]$virtualNetwork.subnets.Count | Should Be 1
+            }
+
+            It "The IP address range for subnet is $($deployment.Parameters.subnetPrefix.Value)" {
+                 [string]$virtualNetwork.subnets[0].properties.addressPrefix | Should Be "10.0.0.0/24"
+            }
+            
+            It "The subnet has been provisioned successfully" {
+                 [string]$virtualNetwork.subnets[0].properties.provisioningState  | Should Be "Succeeded"
+            }
+
+     }
+    Context "Public IP address from template deployment" {
+     
+            It "The public IP address resource Have been deployed successfully" {                
+                [string]$publicIP.provisioningState | Should Be "Succeeded"
+            }
+            It "The Public IP address is allocation dynamic IP address" {
+                 [string]$publicIP.publicIPAllocationMethod | Should Be "Dynamic"
+            }
+     }
+
+    Context "Network Interface from template deployment" {
+     
+            It "The NIC Have been provisioned successfully" {                
+                [string]$nic.provisioningState | Should Be "Succeeded"
+            }
+            It "Is primary NIC" {
+                 [string]$nic.primary | Should Be true
+            }
+            It "IP forwarding is disabled on NIC" {
+                 [int]$nic.enableIPForwarding | Should Be 0
+            }
+
+            It "TThe NIC IP configuration was provisioned successfully" {
+                 [string]$nic.ipConfigurations[0].properties.provisioningState | Should Be "Succeeded"
+            }
+            
+            It "The NIC is the primary Nic" {
+                 [string]$nic.ipConfigurations[0].properties.primary  | Should Be true
+            }
+            It "The IP allocation method used for NIC is dynamic" {
+                 [string]$nic.ipConfigurations[0].properties.privateIPAllocationMethod | Should Be "Dynamic"
+            }
+            
+            It "The NIC is associated to appropriate subnet" {
+                 [string]$nic.ipConfigurations[0].properties.subnet.id  | should be  $([string]$virtualNetwork.subnets[0].id)
+            }
+            
+            It "NIC is referencing the appropriate public IP resource" {
+                 [string]$nic.ipConfigurations[0].properties.publicIPAddress.id  | should be  $(Get-AzureRmResource -ResourceId $([string]$nic.ipConfigurations[0].properties.publicIPAddress.id)).Resourceid
+            }
+
+
+     }
+
+    Context "Virtual Machine from template deployment" {
+     
+            It "The virtual machine is provisioned successfully" {                
+                [string]$virtualMachine.provisioningState | Should Be "Succeeded"
+            }
+            It "The size of virtual machine is $($deployment.Parameters.virtualMachineSize.Value)" {
+                 [string]$virtualMachine.hardwareProfile.vmSize | Should Be "Standard_A2"
+            }
+            It "The virtual machine is attached to appropriate NIC" {
+                 [string]$virtualMachine.networkProfile.networkInterfaces[0].id | Should Be $(Get-AzureRmResource -ResourceId $([string]$virtualMachine.networkProfile.networkInterfaces[0].id)).Resourceid
+            }
+
+            It "The virtual machine is enabled for automatic update" {
+                [bool]$virtualMachine.osProfile.windowsConfiguration.enableAutomaticUpdates | Should Be true
+            }
+            
+            It "VM agent is provisioned within virtual machine" {
+                 [bool]$virtualMachine.osProfile.windowsConfiguration.provisionVMAgent | Should Be true
+            }
+            It "The SKU of virtual machine image is $($deployment.Parameters.imageReferenceSku.Value)" {
+                 [string]$virtualMachine.storageProfile.imageReference.sku | Should Be "2016-Datacenter"
+            }
+            
+            It "The offer of virtual machine image is $($deployment.Parameters.imageReferenceOffer.Value)" {
+                 [string]$virtualMachine.storageProfile.imageReference.offer  | Should Be "WindowsServer"
+            }
+            
+            It "The publisher of virtual machine image is $($deployment.Parameters.imageReferencePublisher.Value)" {
+                 [string]$virtualMachine.storageProfile.imageReference.publisher  | Should Be "MicrosoftWindowsServer"
+            }
+            It "The virtual machine is based on Windows operating system" {
+                 [string]$virtualMachine.storageProfile.osDisk.osType  | Should Be "Windows"
+            }
+            It "The virtual machine is creating using an Image" {
+                 [string]$virtualMachine.storageProfile.osDisk.createOption  | Should Be "FromImage"
+            }
+            It "The size of virtual machine os disk is 127 GB" {
+                 [int]$virtualMachine.storageProfile.osDisk.diskSizeGB  | Should Be 127
+            }
+            It "The caching is ReadWrite for virtual machine os disk" {
+                 [string]$virtualMachine.storageProfile.osDisk.caching  | Should Be "ReadWrite"
+            }
+     }
+   
+    
+ } 

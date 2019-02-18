@@ -1,0 +1,49 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "storageAccountName": {
+      "type": "string",
+      "minLength": 5
+    },
+    "HighDurability": {
+      "type": "string",
+      "defaultValue": "true"
+    },
+    "isVersion2": {
+      "type": "string",
+      "defaultValue": "false"
+    }
+  },
+  "variables": {
+    "storageAccountNameVar": "[tolower(concat(parameters('storageAccountName'), uniqueString(resourceGroup().id)))]"
+  },
+  "resources": [
+    {
+      "condition": "[equals(mod(copyindex(),2),1)]",
+      "apiVersion": "2018-02-01",
+      "name": "[concat(variables('storageAccountNameVar'), copyindex())]",
+      "location": "[resourceGroup().location]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "sku": {
+        "name": "[concat(  if(equals(parameters('HighDurability'), 'true'), 'Premium_LRS','Standard_GRS') )]"
+      },
+      "copy": {
+        "name": "storages",
+        "count": 4
+      },
+      "kind": "[concat( if(equals(parameters('isVersion2'), 'true'), 'StorageV2','Storage') )]",
+      "properties": {
+        "encryption": {
+          "services": {
+            "blob": {
+              "enabled": true
+            },
+            "file": null
+          },
+          "keySource": "Microsoft.Storage"
+        }
+      }
+    }
+  ]
+}

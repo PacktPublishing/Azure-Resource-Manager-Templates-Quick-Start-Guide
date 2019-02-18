@@ -1,0 +1,30 @@
+{
+          "type": "extensions",
+          "apiVersion": "2015-06-15",
+          "name": "Microsoft.Powershell.DSC",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines',variables('vmName'))]"
+          ],
+          "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.9",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "Configuration": {
+                "url": "https://armtfiles.blob.core.windows.net/templates/psdsc-configdata.ps1.zip",
+                "script": "psdsc-configdata.ps1",
+                "function": "Main"
+              },
+              "configurationArguments": {
+                "serviceName": "XPS-Viewer"
+               
+              },
+              "configurationData": {
+                "url": "https://armtfiles.blob.core.windows.net/templates/configdata.psd1"
+              }
+            }
+           
+          }
+        }

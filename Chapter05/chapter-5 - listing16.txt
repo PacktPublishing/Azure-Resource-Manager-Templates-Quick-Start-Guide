@@ -1,0 +1,22 @@
+{
+          "type": "extensions",
+          "apiVersion": "2015-06-15",
+          "name": "Microsoft.Powershell.DSC",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines',variables('vmName'))]"
+          ],
+          "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.9",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "Configuration": {
+                "url": "[concat(parameters('storageAccountName'),'/',parameters('containerName'),'/',parameters('zipfileName'))]",
+                "script": "[parameters('fileName')]",
+                "function": "Main"
+              }
+            }
+          }
+        }

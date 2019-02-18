@@ -1,0 +1,33 @@
+Context "Network Interface from template deployment" {
+     
+            It "The NIC Have been provisioned successfully" {                
+                [string]$nic.provisioningState | Should Be "Succeeded"
+            }
+            It "Is primary NIC" {
+                 [string]$nic.primary | Should Be true
+            }
+            It "IP forwarding is disabled on NIC" {
+                 [int]$nic.enableIPForwarding | Should Be 0
+            }
+
+            It "The NIC IP configuration was provisioned successfully" {
+                 [string]$nic.ipConfigurations[0].properties.provisioningState | Should Be "Succeeded"
+            }
+            
+            It "The NIC is the primary Nic" {
+                 [string]$nic.ipConfigurations[0].properties.primary  | Should Be true
+            }
+            It "The IP allocation method used for NIC is dynamic" {
+                 [string]$nic.ipConfigurations[0].properties.privateIPAllocationMethod | Should Be "Dynamic"
+            }
+            
+            It "The NIC is associated to appropriate subnet" {
+                 [string]$nic.ipConfigurations[0].properties.subnet.id  | should be  $([string]$virtualNetwork.subnets[0].id)
+            }
+            
+            It "NIC is referencing the appropriate public IP resource" {
+                 [string]$nic.ipConfigurations[0].properties.publicIPAddress.id  | should be  $(Get-AzureRmResource -ResourceId $([string]$nic.ipConfigurations[0].properties.publicIPAddress.id)).Resourceid
+            }
+
+
+     } 

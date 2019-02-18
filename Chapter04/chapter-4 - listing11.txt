@@ -1,0 +1,48 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "clientId": { "type": "string" },
+    "tenantId": { "type": "string" },
+    "enabledForDeployment": { "type": "string" },
+    "enabledForTemplateDeployment": { "type": "string" },
+    "enableVaultForVolumeEncryption": { "type": "string" },
+    "vaultSku": { "type": "string" },
+    "vaultName": { "type": "string" },
+    "permissions": { "type": "object" }
+  },
+  "variables": {
+
+  },
+  "resources": [
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "name": "[concat(parameters('vaultName'), resourceGroup().location)]",
+      "apiVersion": "2015-06-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "enabledForDeployment": "[parameters('enabledForDeployment')]",
+        "enabledForTemplateDeployment": "[parameters('enabledForTemplateDeployment')]",
+        "enabledForVolumeEncryption": "[parameters('enableVaultForVolumeEncryption')]",
+        "tenantId": "[parameters('tenantId')]",
+        "accessPolicies": [
+          {
+            "tenantId": "[parameters('tenantId')]",
+            "objectId": "[parameters('clientId')]",
+            "permissions": "[parameters('permissions')]"
+          }
+        ],
+        "sku": {
+          "name": "[parameters('vaultSku')]",
+          "family": "A"
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "keyVaultName": {
+      "type": "string",
+      "value": "[concat(parameters('vaultName'), resourceGroup().location)]"
+    }
+  }
+}

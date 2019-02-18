@@ -1,0 +1,28 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "Locations": {
+      "type": "array",
+      "defaultValue": [ "east us", "west us" ],
+      "metadata": {
+        "description": "Deployment locations"
+      }
+    }  
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/resourceGroups",
+      "location": "[parameters('Locations')[copyIndex()]]",
+      "name": "[concat('location',copyIndex())]",
+      "apiVersion": "2018-05-01",
+      "copy": {
+        "name": "allResourceGroups",
+        "count": "[length(parameters('Locations'))]"
+      },
+      "properties": {}
+    }
+  ]  
+}

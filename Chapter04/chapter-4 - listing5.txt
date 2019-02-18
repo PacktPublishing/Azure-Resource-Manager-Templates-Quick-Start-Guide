@@ -1,0 +1,40 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+  },
+  "variables": {
+    "virtualPath": [
+      "/myapp/api",
+      "/myapp/api/internal/login",
+      "/myapp/api/external/login"
+    ],
+    "physicalPath": [
+      "site\\wwwroot\\armwebsite",
+      "site\\wwwroot\\armwebsite\\internal\\login",
+      "site\\wwwroot\\armwebsite\\internal\\login"
+    ],
+    "myVirtualDirectories": {
+      "copy": [
+        {
+          "name": "virtualDirectories",
+          "count": "[length(variables('physicalPath'))]",
+          "input": {
+            "virtualPath": "[variables('virtualPath')[copyIndex('virtualDirectories')]]",
+            "physicalPath": "[variables('physicalPath')[copyIndex('virtualDirectories')]]",
+            "preloadEnabled": false,
+            "virtualDirectories": null
+          }
+        }
+      ]
+    }
+  },
+  "resources": [
+  ],
+  "outputs": {
+    "arrayOutput": {
+      "type": "object",
+      "value": "[variables('myVirtualDirectories')]"
+    }
+  }
+}

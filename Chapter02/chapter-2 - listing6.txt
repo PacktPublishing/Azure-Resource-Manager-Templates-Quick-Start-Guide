@@ -1,0 +1,1 @@
+New-AzureRmResourceGroupDeployment -Name "TestDeploy1" -ResourceGroupName "TestRG" -Mode Incremental -TemplateFile "C:\myARMTemple.json" -TemplateParameterFile "C:\myARMTemplateParameters.json" -Verbose 

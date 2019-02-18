@@ -1,0 +1,37 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "storageAccountConfiguration": {
+        "type" : "object",
+        "defaultValue" : {
+            "name" : "sdw543fggsdfsd",
+            "apiVersion" : "2018-02-01",
+            "sku" : {
+                "name" : "Standard_LRS"
+            }
+        }
+      }
+    },
+    "variables": {
+      
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Storage/storageAccounts",
+        "name": "[parameters('storageAccountConfiguration').name]",
+        "apiVersion": "[parameters('storageAccountConfiguration').apiVersion]",
+        "location": "[resourceGroup().location]",
+        "sku": {
+          "name": "[parameters('storageAccountConfiguration').sku.name]",
+        },
+        "kind": "Storage"
+      }
+    ],
+    "outputs": {
+      "storageDetails": {
+        "type": "string",
+        "value": "[concat(parameters('storageAccountConfiguration').name, parameters('storageAccountConfiguration').sku.name)]"
+      }
+    }
+  }

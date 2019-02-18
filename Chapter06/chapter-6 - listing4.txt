@@ -1,0 +1,38 @@
+function AddTwoNumbers([int] $a, [int] $b) {
+    
+    return $a + $b
+
+}
+
+ $firstValue, $secondValue
+ Describe "Addition Validation Tests" {
+   BeforeAll {        
+        $firstValue = 10
+        $secondValue = 20;
+    }
+
+    Context "using Global variables" {
+     
+            It "Adding two positive numbers" {                
+                AddTwoNumbers -a $firstValue -b $secondValue | Should Be 30
+            }
+     }  
+
+    Context "Using Local Variables" {
+     
+            It "Adding two positive numbers" {     
+            $firstValue = 100
+            $secondValue = 200           
+                AddTwoNumbers -a $firstValue -b $secondValue | Should Be 300
+            }
+
+            It "Adding two negative numbers" {
+                $firstValue = -100
+                $secondValue = -200 
+                AddTwoNumbers -a $firstValue -b $secondValue | Should Be -300
+            }
+     }
+
+   
+    
+ } 

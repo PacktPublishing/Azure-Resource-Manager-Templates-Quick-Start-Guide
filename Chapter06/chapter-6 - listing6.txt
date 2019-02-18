@@ -1,0 +1,17 @@
+Context "Storage from template deployment" {
+     
+            It "The storage account has been provisioned successfully" {                
+                [string]$storage.provisioningState | Should Be "Succeeded"
+            }
+            It "The storage account is in available state" {
+                 [string]$storage.statusOfPrimary | Should Be "available"
+            }
+
+
+            
+            It "The storage account location is West Europe" {
+                 [string]$storage.primaryLocation | Should Be "westeurope"
+            }
+
+     }   
+

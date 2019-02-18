@@ -1,0 +1,1 @@
+az group create --name CLIDeployment --location "West Europe"

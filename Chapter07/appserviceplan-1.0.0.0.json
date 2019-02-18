@@ -1,0 +1,35 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "customTags": { "type": "object" },
+    "appServicePlanName": { "type": "string" },
+    "appServicePlanSkuTier": { "type": "string" },
+    "appServicePlanSkuName": { "type": "string" }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "kind": "app",
+      "name": "[parameters('appServicePlanName')]",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-09-01",
+      "tags": "[parameters('customTags')]",
+      "properties": {
+        "name": "[parameters('appServicePlanName')]"
+      },
+      "sku": {
+        "Tier": "[parameters('appServicePlanSkuTier')]",
+        "Name": "[parameters('appServicePlanSkuName')]"
+      }
+    }
+  ],
+  "outputs": {
+    "appServicePlan": {
+      "type": "object",
+      "value": "[reference(parameters('appServicePlanName'))]"
+    }
+  }
+}

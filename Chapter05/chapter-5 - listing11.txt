@@ -1,0 +1,24 @@
+{
+          "apiVersion": "2015-06-15",
+          "type": "Microsoft.Compute/virtualMachines/extensions",
+          "name": "[concat(variables('vmName'), '/', 'linuxscripts')]",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+          ],
+          "tags": {
+            "displayName": "config-app"
+          },
+          "properties": {
+            "publisher": "Microsoft.OSTCExtensions",
+            "type": "CustomScriptForLinux",
+            "typeHandlerVersion": "1.2",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "fileUris": [
+                "https://allarmfiles.blob.core.windows.net/armfiles/first.sh"
+              ],
+              "commandToExecute": "[concat('sh first.sh ','argument1 ','argument2 ', 'argument 3 ')]"
+            }
+          }
+        }

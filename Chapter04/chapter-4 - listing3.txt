@@ -1,0 +1,20 @@
+{
+  "name": "examplevm",
+  "type": "Microsoft.Compute/virtualMachines",
+  "apiVersion": "2017-03-30",
+  "properties": {
+    "storageProfile": {
+      "copy": [
+        {
+          "name": "dataDisks",
+          "count": 3,
+          "input": {
+            "lun": "[copyIndex('dataDisks')]",
+            "createOption": "Empty",
+            "diskSizeGB": "1023"
+          }
+        }
+      ]
+    }
+  }
+}
