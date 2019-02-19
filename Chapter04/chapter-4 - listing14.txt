@@ -35,8 +35,8 @@
       "apiVersion": "2017-05-10",
       "name": "[concat('nestedTemplate', copyindex())]",
       "type": "Microsoft.Resources/deployments",
-      "resourceGroup": "[concat('location',copyIndex())]",
-      "subscriptionId": "[concat('subscriptions',copyIndex())]",
+      "resourceGroup": "[parameters('location')[copyIndex()]]",
+      "subscriptionId": "[parameters('subscriptions')[copyIndex()]]",
       "copy": {
         "name": "keyVaults",
         "count": "[length(parameters('Locations'))]",
