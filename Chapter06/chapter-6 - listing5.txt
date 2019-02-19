@@ -1,0 +1,12 @@
+    BeforeAll {
+        
+
+$deployment =  (Get-AzureRmResourceGroupDeployment -ResourceGroupName $deploymentName  -Name $deploymentName)
+
+$storage = $deployment.Outputs.storageaccount.Value
+$publicIP = $deployment.Outputs.publicIPAddressName.Value
+$nic = $deployment.Outputs.nicName.Value
+$virtualNetwork = $deployment.Outputs.virtualNetworkName.Value
+$virtualMachine = $deployment.Outputs.vmName.Value 
+
+    } 

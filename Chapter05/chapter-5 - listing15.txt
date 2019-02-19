@@ -1,0 +1,12 @@
+    "storageAccountName": {
+      "type": "string"
+    },
+    "containerName": {
+      "type": "string"
+    },
+    "zipfileName": {
+      "type": "string"
+    },
+    "fileName": {
+      "type": "string"
+    }

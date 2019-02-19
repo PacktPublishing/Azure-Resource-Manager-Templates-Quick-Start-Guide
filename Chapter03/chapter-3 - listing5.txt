@@ -1,0 +1,102 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "sqlServerName": {
+      "type": "string",
+      "defaultValue": "riteshsrvunq01"
+    },
+    "sqlServerAdministratorLoginName": {
+      "type": "string",
+      "defaultValue": "citynextadmin"
+    },
+    "sqlServerAdministratorLoginPassword": {
+      "type": "securestring",
+      "defaultValue": "Password!1234"
+    },
+    "sqlDatabaseCollation": {
+      "type": "string",
+      "defaultValue": "SQL_Latin1_General_CP1_CI_AS"
+    },
+    "sqlDatabaseEdition": {
+      "type": "string",
+      "defaultValue": "Standard"
+    },
+    "sqlDatabaseMaxSizeBytes": {
+      "type": "string",
+      "defaultValue": "107374182400"
+    },
+    "sqlDatabaseName": {
+      "type": "string",
+      "defaultValue": "riteshdbunq01"
+    },
+    "sqlDatabaseRequestedServiceObjectiveName": {
+      "type": "string",
+      "defaultValue": "S2"
+    }
+  },
+  "variables": {
+    "storagekey": "?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwdlacup&se=2018-08-20T19:22:51Z&st=2018-08-20T11:22:51Z&spr=https&sig=4oGQeTncirZHxyyiMv%2Bhx1A4Tmx7%2FF4Xbp64i9ATpd4%3D",
+    "nestedTemplateLocation": "https://sta2usc1esvpnvhddev.blob.core.windows.net/templates/nestedSQLTemplate.json",
+    "completeNestedTemplateURL": "[concat(variables('nestedTemplateLocation'), variables('storagekey'))]"
+
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2017-05-10",
+      "name": "DeploySQLResources",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('completeNestedTemplateURL')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "sqlServerName": {
+            "value": "[parameters('sqlServerName')]"
+          },
+          "sqlServerAdministratorLoginName": {
+            "value": "[parameters('sqlServerAdministratorLoginName')]"
+          },
+          "sqlServerAdministratorLoginPassword": {
+            "value": "[parameters('sqlServerAdministratorLoginPassword')]"
+          },
+          "sqlDatabaseCollation": {
+            "value": "[parameters('sqlDatabaseCollation')]"
+          },
+          "sqlDatabaseEdition": {
+            "value": "[parameters('sqlDatabaseEdition')]"
+          },
+          "sqlDatabaseMaxSizeBytes": {
+            "value": "[parameters('sqlDatabaseMaxSizeBytes')]"
+          },
+          "sqlDatabaseName": {
+            "value": "[parameters('sqlDatabaseName')]"
+          },
+          "sqlDatabaseRequestedServiceObjectiveName": {
+            "value": "[parameters('sqlDatabaseRequestedServiceObjectiveName')]"
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "DatabaseResourceID": {
+      "type": "string",
+      "value": "[reference('DeploySQLResources').outputs.SQLDatabaseResourceIDfromDiffernetSubscription.value]"      
+    },
+    "SQLDatabaseObject": {
+      "type": "object",
+      "value": "[reference('DeploySQLResources').outputs.SQLDatabase.value]"      
+    },
+    "SQLServerObject": {
+      "type": "object",
+      "value": "[reference('DeploySQLResources').outputs.SQLServer.value]"   
+    },
+    "SQLServerDomain": {
+      "type": "string",
+      "value": "[reference('DeploySQLResources').outputs.SQLServer1.value]"
+    }
+  }
+}

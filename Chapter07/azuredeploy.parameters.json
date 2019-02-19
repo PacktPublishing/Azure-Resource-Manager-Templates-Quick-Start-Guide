@@ -1,0 +1,63 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "resourceGroupInfo": {
+      "value": [
+        {
+          "resourceGroupName": "eCommerceUS",
+          "resourceGroupLocation": "East US 2",
+          "resourceGroupSuffix": "eastus"
+        },
+        {
+          "resourceGroupName": "eCommerceEurope",
+          "resourceGroupLocation": "West Europe",
+          "resourceGroupSuffix": "westEurope"
+
+        }
+      ]
+    },
+    "sqlServerProperties": {
+      "value": {
+        "administratorLogin": "eCommerceAdmin",
+        "databaseName": "eCommerceDatabase",
+        "collation": "SQL_Latin1_General_CP1_CI_AS",
+        "edition": "Standard",
+        "maxSizeBytes": "1073741824",
+        "requestedServiceObjectiveName": "S0",
+        "sqlserverName": "armtemplatebooksqlserver",
+        "keyVaultName": "keyvaultarmtemplatebook",
+        "keyVaultResourceGroupName": "ARMPatterns",
+        "adminstratorPasswordSecretName": "adminstratorPasswordSQL"
+      }
+    },
+    "templateRepository": {
+      "value": {
+        "libraryTemplateStorageAccountName": "hostforarmtemplates",
+        "libraryTemplateStorageContainerName": "armtemplates"
+      }
+    },
+    "environmentName": {
+      "value": "DEV"
+    },
+    "department": {
+      "value": "Finance"
+    },
+    "storagekey": {
+      "reference": {
+        "keyVault": { "id": "/subscriptions/9755ffce-e94b-4332-9be8-1ade15e78909/resourceGroups/ARMPatterns/providers/Microsoft.KeyVault/vaults/keyvaultarmtemplatebook" },
+        "secretName": "storageAccountkey"
+      }
+    },
+    "appServicePlanSkuName": {
+      "value": "S1"
+    },
+    "appServicePlanSkuTier": {
+      "value": "Standard"
+    },
+    "diagnosticlevel": {
+      "value": "warning"
+    }
+
+  }
+  }

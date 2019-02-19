@@ -1,0 +1,10 @@
+Context "Public IP address from template deployment" {
+     
+            It "The public IP address resource Have been deployed successfully" {                
+                [string]$publicIP.provisioningState | Should Be "Succeeded"
+            }
+            It "The Public IP address is allocation dynamic IP address" {
+                 [string]$publicIP.publicIPAllocationMethod | Should Be "Dynamic"
+            }
+     } 
+

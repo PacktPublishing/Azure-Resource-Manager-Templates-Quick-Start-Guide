@@ -1,0 +1,28 @@
+{
+          "name": "firstCustomScriptExtension",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2016-03-30",
+          "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))]"
+          ],
+          "tags": {
+            "displayName": "firstCustomScriptExtension"
+          },
+          "properties": {
+            "publisher": "Microsoft.Compute",
+            "type": "CustomScriptExtension",
+            "typeHandlerVersion": "1.4",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "fileUris": [
+                "[concat(parameters('storageAccountName'), '/', variables('firstCustomScriptExtensionScriptStorageContainer'), '/', variables('firstCustomScriptExtensionScriptFileName'))]"
+              ]             
+            },
+            "protectedSettings": {
+              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ',  variables('firstCustomScriptExtensionScriptFileName'), ' -featureName web-server -serviceName w3svc')]",
+              "storageAccountName": "armtfiles",
+              "storageAccountKey": "your key"
+            }
+          }
+        }

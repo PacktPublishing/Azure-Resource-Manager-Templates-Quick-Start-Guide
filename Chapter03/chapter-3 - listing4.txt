@@ -1,0 +1,86 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "sqlServerName": {
+      "type": "string",
+      "defaultValue": "riteshsrvunq01"
+    },
+    "sqlServerAdministratorLoginName": {
+      "type": "string",
+      "defaultValue": "citynextadmin"
+    },
+    "sqlServerAdministratorLoginPassword": {
+      "type": "securestring",
+      "defaultValue": "Password!1234"
+    },
+    "sqlDatabaseCollation": {
+      "type": "string",
+      "defaultValue": "SQL_Latin1_General_CP1_CI_AS"
+    },
+    "sqlDatabaseEdition": {
+      "type": "string",
+      "defaultValue": "Standard"
+    },
+    "sqlDatabaseMaxSizeBytes": {
+      "type": "string",
+      "defaultValue": "107374182400"
+    },
+    "sqlDatabaseName": {
+      "type": "string",
+      "defaultValue": "riteshdbunq01"
+    },
+    "sqlDatabaseRequestedServiceObjectiveName": {
+      "type": "string",
+      "defaultValue": "S2"
+    }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Sql/servers",
+      "kind": "v12.0",
+      "name": "[parameters('sqlServerName')]",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-05-01-preview",
+
+      "properties": {
+        "administratorLogin": "[parameters('sqlServerAdministratorLoginName')]",
+        "administratorLoginPassword": "[parameters('sqlServerAdministratorLoginPassword')]",
+        "version": "12.0"
+      },
+      "resources": [
+        {
+          "type": "Microsoft.Sql/servers/databases",
+          "name": "[concat(parameters('sqlServerName'),'/',parameters('sqlDatabaseName'))]",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2017-10-01-preview",
+          "dependsOn": [
+            "[parameters('sqlServerName')]"
+          ],
+          "properties": {
+            "edition": "[parameters('sqlDatabaseEdition')]",
+            "collation": "[parameters('sqlDatabaseCollation')]",
+            "maxSizeBytes": "[parameters('sqlDatabaseMaxSizeBytes')]",
+            "requestedServiceObjectiveName": "[parameters('sqlDatabaseRequestedServiceObjectiveName')]"
+          }
+        }
+      ]
+    }
+  ],
+  "outputs": {
+    "SQLServer1": {
+      "type": "string",
+      "value": "[reference(parameters('sqlServerName')).fullyQualifiedDomainName]"
+    },
+    "SQLServer": {
+      "type": "object",
+      "value": "[reference(parameters('sqlServerName'))]"
+    },
+    "SQLDatabase": {
+      "type": "object",
+      "value": "[reference(resourceid('Microsoft.SQL/servers/databases', parameters('sqlServerName'), parameters('sqlDatabaseName')),'2017-10-01-preview', 'full')]"
+    }
+  }
+}

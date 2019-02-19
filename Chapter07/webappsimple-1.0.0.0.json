@@ -1,0 +1,73 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "appServicePlanName": { "type": "string" },
+    "diagnosticlevel": {
+      "type": "string",
+      "allowedValues": [ "error", "warning", "information", "verbose" ],
+      "defaultValue": "warning"
+    },
+    "customTags": { "type": "object" },
+    "webAppName": { "type": "string" },
+    "serverName": { "type": "string" },
+    "databaseName": { "type": "string" },
+    "userID": { "type": "string" },
+    "administratorLoginPassword": { "type": "securestring" }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/sites",
+      "kind": "app",
+      "name": "[parameters('webAppName')]",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-08-01",
+      "tags": "[parameters('customTags')]",
+      "properties": {
+        "name": "[parameters('webAppName')]",
+        "enabled": true,
+        "reserved": true,
+        "serverFarmId": "[resourceId('Microsoft.Web/serverFarms', parameters('appServicePlanName'))]",
+        "siteConfig": {
+          "AlwaysOn": true,
+          "connectionStrings": [
+            {
+              "name": "ConnString1",
+              "connectionString": "[concat('Data Source=tcp:', parameters('serverName'), 'Initial Catalog=', parameters('databaseName'), 'User Id=', parameters('userID') ,  'Password=', parameters('administratorLoginPassword') , ';')]"
+            }
+          ]
+        },
+        "applicationLogs": {
+          "fileSystem": {
+            "level": "On"
+          },
+          "azureTableStorage": {
+            "level": "Off",
+            "sasUrl": null
+          }
+        },
+        "httpLogs": {
+          "fileSystem": {
+            "retentionInMb": 35,
+            "retentionInDays": 365,
+            "enabled": false
+          }
+        },
+        "failedRequestsTracing": {
+          "enabled": true
+        },
+        "detailedErrorMessages": {
+          "enabled": true
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "webapp": {
+      "type": "object",
+      "value": "[reference(parameters('webAppName'))]"
+    }
+  }
+}

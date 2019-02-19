@@ -1,0 +1,208 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "resourceGroupInfo": {
+      "type": "array"
+    },
+    "sqlServerProperties": {
+      "type": "object"
+    },
+    "environmentName": {
+      "type": "string",
+      "allowedValues": [ "DEV", "TST", "PRD", "SIT", "PAT", "STG", "UAT" ]
+    },
+    "department": {
+      "type": "string"
+    },
+    "templateRepository": {
+      "type": "object"
+    },
+    "storagekey": {
+      "type": "securestring"
+    },
+    "appServicePlanSkuTier": {
+      "type": "string"
+    },
+    "appServicePlanSkuName": {
+      "type": "string"
+    },
+    "diagnosticlevel": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "variableTags": "[json(concat('{\"application\": \"All\", \"environment\": \"',parameters('environmentName'),'\", \"supportTeam\": \"',parameters('department'),'\"}'))]",
+    "templateRefBaseUri": "[concat('https://', parameters('templateRepository').libraryTemplateStorageAccountName,'.blob.core.windows.net/', parameters('templateRepository').libraryTemplateStorageContainerName, '/')]",
+    "templateRefAppPlanTemplateUri": "[concat(variables('templateRefBaseUri'), 'appserviceplan-1.0.0.0.json',parameters('storagekey'))]",
+    "templateRefWebAppTemplateUri": "[concat(variables('templateRefBaseUri'), 'webappsimple-1.0.0.0.json',parameters('storagekey'))]",
+    "templateRefSharedServicesTemplateUri": "[concat(variables('templateRefBaseUri'), 'SharedServicesSQL-1.0.0.0.json',parameters('storagekey'))]",
+    "multiLocation": {
+      "copy": [
+        {
+          "name": "location",
+          "count": "[length(parameters('resourceGroupInfo'))]",
+          "input": {
+            "resourceGroupName": "[concat('RGP','-',parameters('environmentName'),'-', parameters('resourceGroupInfo')[copyIndex('location')].resourceGroupName )]",
+            "appServicePlanName": "[toLower(concat('asp','-',parameters('resourceGroupInfo')[copyIndex('location')].resourceGroupSuffix,'-',parameters('appServicePlanSkuName'),'-', parameters('environmentName')))]",
+            "webAppName": "[toLower(concat('web','-',parameters('resourceGroupInfo')[copyIndex('location')].resourceGroupSuffix,'-', parameters('appServicePlanSkuName'),'-', parameters('environmentName')))]"
+          }
+        }
+      ]
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/resourceGroups",
+      "location": "[parameters('resourceGroupInfo')[copyIndex()].resourceGroupLocation]",
+      "name": "[variables('multiLocation').location[copyIndex()].resourceGroupName]",
+      "apiVersion": "2018-05-01",
+      "tags": "[variables('variableTags')]",
+      "copy": {
+        "name": "allResourceGroups",
+        "count": "[length(parameters('resourceGroupInfo'))]"
+      },
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2017-05-10",
+      "name": "sharedServices-sqlServices",
+      "resourceGroup": "[variables('multiLocation').location[0].resourceGroupName]",
+      "dependsOn": [
+        "allResourceGroups"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('templateRefSharedServicesTemplateUri')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "administratorLogin": {
+            "value": "[parameters('sqlServerProperties').administratorLogin]"
+          },
+          "administratorLoginPassword": {
+            "reference": {
+              "keyVault": {
+                "id": "[concat(subscription().id,'/resourcegroups/', parameters('sqlServerProperties').keyVaultResourceGroupName, '/providers/Microsoft.KeyVault/vaults/', parameters('sqlServerProperties').keyVaultName)]"
+              },
+              "secretName": "[parameters('sqlServerProperties').adminstratorPasswordSecretName]"
+            }
+          },
+          "databaseName": {
+            "value": "[parameters('sqlServerProperties').databaseName]"
+          },
+          "customTags": {
+            "value": "[variables('variableTags')]"
+          },
+          "collation": {
+            "value": "[parameters('sqlServerProperties').collation]"
+          },
+          "edition": {
+            "value": "[parameters('sqlServerProperties').edition]"
+          },
+          "maxSizeBytes": {
+            "value": "[parameters('sqlServerProperties').maxSizeBytes]"
+          },
+          "requestedServiceObjectiveName": {
+            "value": "[parameters('sqlServerProperties').requestedServiceObjectiveName]"
+          },
+          "sqlserverName": {
+            "value": "[parameters('sqlServerProperties').sqlserverName]"
+          }
+        }
+      }
+    },
+
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2017-05-10",
+      "name": "[concat('crossAppServePlan', copyIndex())]",
+      "dependsOn": [
+        "sharedServices-sqlServices"
+      ],
+      "copy": {
+        "name": "allAppServicePlans",
+        "count": "[length(parameters('resourceGroupInfo'))]"
+      },
+      "resourceGroup": "[variables('multiLocation').location[copyIndex()].resourceGroupName]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('templateRefAppPlanTemplateUri')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "appServicePlanName": {
+            "value": "[variables('multiLocation').location[copyIndex()].appServicePlanName]"
+          },
+          "appServicePlanSkuTier": {
+            "value": "[parameters('appServicePlanSkuTier')]"
+          },
+          "appServicePlanSkuName": {
+            "value": "[parameters('appServicePlanSkuName')]"
+          },
+          "customTags": {
+            "value": "[variables('variableTags')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2017-05-10",
+      "name": "[concat('crossWebApp', copyIndex())]",
+      "dependsOn": [
+        "allAppServicePlans"
+      ],
+      "copy": {
+        "name": "allWebApps",
+        "count": "[length(parameters('resourceGroupInfo'))]"
+      },
+      "resourceGroup": "[variables('multiLocation').location[copyIndex()].resourceGroupName]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('templateRefWebAppTemplateUri')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "appServicePlanName": {
+            "value": "[variables('multiLocation').location[copyIndex()].appServicePlanName]"
+          },
+          "diagnosticlevel": {
+            "value": "[parameters('diagnosticlevel')]"
+          },
+          "webAppName": {
+            "value": "[variables('multiLocation').location[copyIndex()].webAppName]"
+          },
+          "serverName": {
+            "value": "[concat(reference('sharedServices-sqlServices').outputs.SQLServerFQDN.value,', 1433;')]"
+          },
+          "databaseName": {
+            "value": "[concat( parameters('sqlServerProperties').databaseName,'; ')]"
+          },
+          "userID": {
+            "value": "[concat(parameters('sqlServerProperties').administratorLogin,'; ')]"
+          },
+          "customTags": {
+            "value": "[variables('variableTags')]"
+          },
+          "administratorLoginPassword": {
+            "reference": {
+              "keyVault": {
+                "id": "[concat('/subscriptions/9755ffce-e94b-4332-9be8-1ade15e78909','/resourcegroups/', parameters('sqlServerProperties').keyVaultResourceGroupName, '/providers/Microsoft.KeyVault/vaults/', parameters('sqlServerProperties').keyVaultName)]"
+              },
+              "secretName": "[parameters('sqlServerProperties').adminstratorPasswordSecretName]"
+            }
+          }
+        }
+      }
+    }
+
+  ],
+  "outputs": {
+    
+  }
+}

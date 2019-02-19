@@ -1,0 +1,1 @@
+Publish-AzureRmVMDscConfiguration -ResourceGroupName armfiles -ConfigurationPath "C:\Users\rites\psdsc-configdata.ps1" -ContainerName templates -StorageAccountName armtfiles -ConfigurationDataPath "C:\Users\rites\configdata.psd1"  -Force -Verbose 

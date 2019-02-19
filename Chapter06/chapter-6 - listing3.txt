@@ -1,0 +1,1 @@
+Get-AzureRmResourceGroupDeployment -ResourceGroupName test01 -Name csa01 -Verbose 

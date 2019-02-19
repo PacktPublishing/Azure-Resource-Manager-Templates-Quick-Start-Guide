@@ -1,0 +1,1 @@
+New-AzureRmResourceGroupDeployment -Name "csa01" -ResourceGroupName test01 -Mode Incremental -TemplateFile "C:\Users\rites\Desktop\Chapter7\templateforUnitTests.json" -adminUsername "superadmin" -adminPassword $(ConvertTo-SecureString -String Pa55w0rdPa55w0rd -AsPlainText -Force) -dnsLabelPrefix armtemplateunique -Verbose 

@@ -1,0 +1,22 @@
+Context "virtual network from template deployment" {
+     
+            It "The virtual network has been provisioned successfully" {                
+                [string]$virtualNetwork.provisioningState | Should Be "Succeeded"
+            }
+            It "The address range for virtual network is "10.0.0.0/16" {
+                 [string]$virtualNetwork.addressSpace.addressPrefixes | Should Be "10.0.0.0/16"
+            }
+            It "The count of subnets in virtual network is 1" {
+                 [int]$virtualNetwork.subnets.Count | Should Be 1
+            }
+
+            It "The IP address range for subnet is "10.0.0.0/24"{
+                 [string]$virtualNetwork.subnets[0].properties.addressPrefix | Should Be "10.0.0.0/24"
+            }
+            
+            It "The subnet has been provisioned successfully" {
+                 [string]$virtualNetwork.subnets[0].properties.provisioningState  | Should Be "Succeeded"
+            }
+
+     } 
+

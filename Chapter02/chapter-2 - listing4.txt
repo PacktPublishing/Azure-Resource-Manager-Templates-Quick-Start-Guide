@@ -1,0 +1,1 @@
+az group deployment create --name CLIDeploy1 --resource-group CLIDeployment --template-file C:\Users\rites\source\repos\MyFirstTemplate\MyFirstTemplate\azuredeploy.json --parameters storageAccountName=unique824798
